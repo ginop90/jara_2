@@ -139,7 +139,7 @@ function generarPDFPresupuesto() {
     // Generar PDF
     const filename = `Presupuesto_${formatDateFile(fecha)}`;
     generatePDF('pdf-presupuesto', filename);
-
+    enviarPorWhatsApp('presupuesto', salon, fecha);
 }
 
 // Generar PDF de Recibo
@@ -167,7 +167,7 @@ function generarPDFRecibo() {
     // Generar PDF
     const filename = `Recibo_${formatDateFile(fecha)}`;
     generatePDF('pdf-recibo', filename);
-
+    enviarPorWhatsApp('recibo', salon, fecha);
 }
 
 // Función para generar PDF usando html2canvas y jsPDF
@@ -309,3 +309,10 @@ window.onload = function() {
     // Agregar un extra por defecto
     agregarExtra();
 };
+// Enviar por WhatsApp con mensaje dinámico
+function enviarPorWhatsApp(tipo, salon, fecha) {
+    const tipoTexto = tipo === 'presupuesto' ? 'Presupuesto' : 'Recibo';
+    const mensaje = `${tipoTexto} para el salón ${salon} con fecha ${formatDate(fecha)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
