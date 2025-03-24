@@ -323,6 +323,7 @@
         .pdf-row-value {
             flex: 1;
             text-align: left; /* Left-align the values */
+            word-break: break-word;
         }
 
         .pdf-document-type {
@@ -399,6 +400,11 @@
                 <div class="form-group">
                     <label for="presupuesto-evento">Tipo de Evento:</label>
                     <input type="text" id="presupuesto-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label for="presupuesto-fecha-evento">Fecha Evento:</label>
+                    <input type="date" id="presupuesto-fecha-evento" name="fecha-evento">
                 </div>
                 
                 <div class="form-group">
@@ -515,6 +521,10 @@
                 <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-evento"></div>
+                </div>
+                <div class="pdf-row">
+                    <div class="pdf-row-label">Fecha Evento:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Cliente:</div>
@@ -683,6 +693,7 @@
         function generarPDFPresupuesto() {
             // Obtener los valores del formulario
             const fecha = document.getElementById('presupuesto-fecha').value;
+            const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
             const salon = document.getElementById('presupuesto-salon').value;
             const evento = document.getElementById('presupuesto-evento').value;
             const cliente = document.getElementById('presupuesto-cliente').value;
@@ -691,6 +702,7 @@
             
             // Actualizar contenido del PDF
             document.getElementById('pdf-presupuesto-fecha').textContent = formatDate(fecha);
+            document.getElementById('pdf-presupuesto-fecha-evento').textContent = formatDate(fechaEvento);
             document.getElementById('pdf-presupuesto-salon').textContent = salon;
             document.getElementById('pdf-presupuesto-evento').textContent = evento;
             document.getElementById('pdf-presupuesto-cliente').textContent = cliente;
