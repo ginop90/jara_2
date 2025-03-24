@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jara DJ's, sonido e iluminación</title>
+    <title>Jara DJ's Group</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -365,7 +365,7 @@
                 <div class="logo">
                     🎧 🎵 💡
                 </div>
-                <h1>Jara DJ's, sonido e iluminación</h1>
+                <h1>Jara DJ's Group</h1>
             </header>
             
             <div class="main-options">
@@ -388,29 +388,30 @@
             
             <div class="form-section">
                 <div class="form-group">
-                    <label for="presupuesto-fecha">Fecha:</label>
+                    <label for="presupuesto-fecha">Emitido el:</label>
                     <input type="date" id="presupuesto-fecha" name="fecha">
-                </div>
-                
-                <div class="form-group">
-                    <label for="presupuesto-salon">Salón:</label>
-                    <input type="text" id="presupuesto-salon" name="salon" placeholder="Nombre del salón">
-                </div>
-                
-                <div class="form-group">
-                    <label for="presupuesto-evento">Tipo de Evento:</label>
-                    <input type="text" id="presupuesto-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
-                </div>
-
-                <div class="form-group">
-                    <label for="presupuesto-fecha-evento">Fecha Evento:</label>
-                    <input type="date" id="presupuesto-fecha-evento" name="fecha-evento">
                 </div>
                 
                 <div class="form-group">
                     <label for="presupuesto-cliente">Cliente:</label>
                     <input type="text" id="presupuesto-cliente" name="cliente" placeholder="Nombre del cliente">
                 </div>
+
+                <div class="form-group">
+                    <label for="presupuesto-evento">Tipo de Evento:</label>
+                    <input type="text" id="presupuesto-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label for="presupuesto-salon">Salón:</label>
+                    <input type="text" id="presupuesto-salon" name="salon" placeholder="Nombre del salón">
+                </div>
+                
+                <div class="form-group">
+                    <label for="presupuesto-fecha-evento">Fecha:</label>
+                    <input type="date" id="presupuesto-fecha-evento" name="fecha-evento">
+                </div>
+                
             </div>
             
             <div class="form-section">
@@ -428,7 +429,7 @@
             </div>
             
             <div class="form-section">
-                <h3>Extras</h3>
+                <h3>Extras o Seña</h3>
                 <div id="extras-container">
                     <!-- Los extras se agregarán aquí dinámicamente -->
                 </div>
@@ -459,21 +460,22 @@
                     <label for="recibo-fecha">Fecha:</label>
                     <input type="date" id="recibo-fecha" name="fecha">
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="recibo-salon">Salón:</label>
-                    <input type="text" id="recibo-salon" name="salon" placeholder="Nombre del salón">
+                    <label for="recibo-cliente">Cliente:</label>
+                    <input type="text" id="recibo-cliente" name="cliente" placeholder="Nombre del cliente">
                 </div>
                 
                 <div class="form-group">
                     <label for="recibo-evento">Tipo de Evento:</label>
                     <input type="text" id="recibo-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="recibo-cliente">Cliente:</label>
-                    <input type="text" id="recibo-cliente" name="cliente" placeholder="Nombre del cliente">
-                </div>
+                    <label for="recibo-salon">Salón:</label>
+                    <input type="text" id="recibo-salon" name="salon" placeholder="Nombre del salón">
+                </div>               
+                
             </div>
             
             <div class="form-section">
@@ -499,8 +501,8 @@
         <div id="pdf-presupuesto" class="pdf-content">
             <div class="pdf-header">
                 <div class="pdf-header-left">
-                    <div class="pdf-company-name">Jara DJ Group</div>
-                    <div class="pdf-company-subtitle">DJ, Sonido e Iluminación</div>
+                    <div class="pdf-company-name">Jara DJ's Group</div>
+                    <div class="pdf-company-subtitle">DJ's, Sonido e Iluminación</div>
                 </div>
                 <div class="pdf-header-right">
                     <div class="pdf-logo">Logo</div>
@@ -511,24 +513,24 @@
                     <div class="pdf-document-type">PRESUPUESTO</div>
                 </div>
                 <div class="pdf-row">
-                    <div class="pdf-row-label">Fecha:</div>
+                    <div class="pdf-row-label">Emitido el:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-fecha"></div>
                 </div>
                 <div class="pdf-row">
-                    <div class="pdf-row-label">Salón:</div>
-                    <div class="pdf-row-value" id="pdf-presupuesto-salon"></div>
+                    <div class="pdf-row-label">Cliente:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-cliente"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-evento"></div>
                 </div>
                 <div class="pdf-row">
-                    <div class="pdf-row-label">Fecha Evento:</div>
-                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
+                    <div class="pdf-row-label">Salón:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-salon"></div>
                 </div>
                 <div class="pdf-row">
-                    <div class="pdf-row-label">Cliente:</div>
-                    <div class="pdf-row-value" id="pdf-presupuesto-cliente"></div>
+                    <div class="pdf-row-label">Fecha:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
                 </div>
                 <hr>
                 <div class="pdf-row">
@@ -571,16 +573,16 @@
                     <div class="pdf-row-value" id="pdf-recibo-fecha"></div>
                 </div>
                 <div class="pdf-row">
+                    <div class="pdf-row-label">Cliente:</div>
+                    <div class="pdf-row-value" id="pdf-recibo-cliente"></div>
+                </div>
+                <div class="pdf-row">
                     <div class="pdf-row-label">Salón:</div>
                     <div class="pdf-row-value" id="pdf-recibo-salon"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
                     <div class="pdf-row-value" id="pdf-recibo-evento"></div>
-                </div>
-                <div class="pdf-row">
-                    <div class="pdf-row-label">Cliente:</div>
-                    <div class="pdf-row-value" id="pdf-recibo-cliente"></div>
                 </div>
                 <hr>
                 <div class="pdf-row">
@@ -632,7 +634,7 @@
             extraDiv.innerHTML = `
                 <div class="form-group">
                     <label for="${extraId}-desc">Descripción:</label>
-                    <input type="text" id="${extraId}-desc" placeholder="Descripción del extra" class="extra-descripcion">
+                    <input type="text" id="${extraId}-desc" placeholder="Descripción" class="extra-descripcion">
                 </div>
                 <div class="form-group">
                     <label for="${extraId}-importe">Importe:</label>
