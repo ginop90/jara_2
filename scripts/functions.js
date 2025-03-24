@@ -161,6 +161,7 @@ function generarPDFRecibo() {
 // Función para generar PDF usando html2canvas y jsPDF
 // Función optimizada para generar PDF
 // Función optimizada para generar PDF
+// Función optimizada para generar PDF
 function generatePDF(elementId, filename) {
     const { jsPDF } = window.jspdf;
     
@@ -169,7 +170,7 @@ function generatePDF(elementId, filename) {
     element.style.display = 'block';
     
     // Determinar escala óptima basada en el dispositivo
-    const scale = isMobile() ? 1.5 : 2;
+    const scale = isMobile() ? 2 : 2;
     
     // Crear PDF
     html2canvas(element, { 
@@ -185,7 +186,6 @@ function generatePDF(elementId, filename) {
             clonedElement.style.height = 'auto';
             clonedElement.style.width = '100%';
             clonedElement.style.maxWidth = '100%';
-            // Eliminar cualquier padding excesivo
             clonedElement.style.paddingBottom = '0';
             clonedElement.style.margin = '0';
             
@@ -198,7 +198,8 @@ function generatePDF(elementId, filename) {
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         
-        // Crear PDF con dimensiones apropiadas
+        // Crear PDF con dimensiones optimizadas para móvil
+        // Usar A5 para tamaño más pequeño y mejor para compartir
         const pdf = new jsPDF('p', 'mm', 'a4');
         
         // Calcular proporciones para mantener aspecto original
@@ -206,7 +207,7 @@ function generatePDF(elementId, filename) {
         const pdfHeight = 297; // Alto de A4
         
         // Calcular tamaño de imagen ajustado al PDF con margen
-        const margin = 10; // 10mm de margen
+        const margin = 5; // 5mm de margen (reducido para maximizar espacio)
         const imgWidth = pdfWidth - (margin * 2);
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
@@ -217,39 +218,49 @@ function generatePDF(elementId, filename) {
         // Añadir la imagen centrada con margen
         pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
         
-        // Manejar contenido que excede la página
-        if (imgHeight > (pdfHeight - margin * 2)) {
-            console.log("Ajustando contenido a la página...");
-            // Reducir imagen para que quepa en una página con márgenes
-            const aspectRatio = canvas.width / canvas.height;
-            const newHeight = pdfHeight - (margin * 2);
-            const newWidth = newHeight * aspectRatio;
-            
-            // Limpiar la página
-            pdf.setFillColor(0, 0, 0);
-            pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-            
-            // Añadir imagen reescalada
-            pdf.addImage(imgData, 'PNG', (pdfWidth - newWidth) / 2, margin, newWidth, newHeight);
-        }
+        // Comprimir el PDF para hacerlo más pequeño (mejor para WhatsApp)
+        const pdfOutput = pdf.output('blob', {
+            compress: true,
+            precision: 2 // Reducir precisión para archivo más pequeño
+        });
         
+        // Guardar PDF
         pdf.save(`${filename}.pdf`);
         
         // Ocultar el elemento después de la captura
         element.style.display = 'none';
         
-        // Si es móvil, intentar compartir el archivo
+        // Si es móvil, intentar compartir el archivo directamente
         if (isMobile()) {
-            const blob = pdf.output('blob');
-            const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
-            
-            if (navigator.share) {
-                navigator.share({
-                    files: [file],
-                    title: filename,
-                }).catch((error) => {
-                    console.error('Error compartiendo archivo:', error);
-                });
+            try {
+                const file = new File([pdfOutput], `${filename}.pdf`, { type: 'application/pdf' });
+                
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                    navigator.share({
+                        files: [file],
+                        title: filename,
+                    }).catch((error) => {
+                        console.error('Error compartiendo archivo:', error);
+                        // Intentar abrir en nueva pestaña como fallback
+                        const fileURL = URL.createObjectURL(file);
+                        window.open(fileURL, '_blank');
+                    });
+                } else {
+                    // Crear un enlace temporal y hacer clic en él
+                    const fileURL = URL.createObjectURL(pdfOutput);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = fileURL;
+                    downloadLink.download = `${filename}.pdf`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    setTimeout(() => {
+                        document.body.removeChild(downloadLink);
+                        URL.revokeObjectURL(fileURL);
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error al compartir/descargar PDF:', error);
+                alert('El PDF ha sido generado. Por favor, compruebe sus descargas.');
             }
         }
     }).catch(error => {
