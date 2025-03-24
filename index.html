@@ -792,28 +792,39 @@
                     heightLeft -= pageHeight;
                 }
         
-                // Crear Blob y archivo
-                const blob = pdf.output('blob');
-                const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
+                try {
+                    const pdfOutput = pdf.output('blob');
+                    const file = new File([pdfOutput], `${filename}.pdf`, { type: 'application/pdf' });
         
-                // Descargar el archivo manualmente
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(file);
-                link.download = `${filename}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                    // 📥 Descargar primero
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(file);
+                    link.download = `${filename}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
         
-                // Ocultar nuevamente el contenido del PDF
-                element.style.display = 'none';
+                    // 👇 Opcional: compartir si es móvil y está disponible
+                    if (isMobile()) {
+                        setTimeout(() => {
+                            if (navigator.share) {
+                                navigator.share({
+                                    files: [file],
+                                    title: filename,
+                                }).catch(err => {
+                                    console.warn('El usuario canceló el compartir o no está disponible:', err);
+                                });
+                            }
+                        }, 1000); // delay para asegurar que la descarga termine primero
+                    }
         
-                // ✅ Esto es opcional: abrir menú de compartir en móviles
-                // if (isMobile() && navigator.share) {
-                //     navigator.share({
-                //         files: [file],
-                //         title: filename,
-                //     }).catch(err => console.log('No se pudo compartir:', err));
-                // }
+                    // Ocultar nuevamente el contenido del PDF
+                    element.style.display = 'none';
+                } catch (error) {
+                    console.error('Error al generar el PDF:', error);
+                    alert('Hubo un error al generar el PDF. Por favor, intente nuevamente.');
+                    element.style.display = 'none';
+                }
             });
         }
 
