@@ -98,12 +98,8 @@ function generarPDFPresupuesto() {
     const detalles = document.getElementById('presupuesto-detalles').value;
     const importe = document.getElementById('presupuesto-importe').value;
     
-    // Obtener fecha del evento
-    const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
-
     // Actualizar contenido del PDF
     document.getElementById('pdf-presupuesto-fecha').textContent = formatDate(fecha);
-    document.getElementById('pdf-presupuesto-fecha-evento').textContent = formatDate(fechaEvento);
     document.getElementById('pdf-presupuesto-salon').textContent = salon;
     document.getElementById('pdf-presupuesto-evento').textContent = evento;
     document.getElementById('pdf-presupuesto-cliente').textContent = cliente;
@@ -137,8 +133,8 @@ function generarPDFPresupuesto() {
     document.getElementById('pdf-presupuesto-total').textContent = formatCurrency(total);
     
     // Generar PDF
-    const filename = `Presupuesto_${formatDateFile(fecha)}`;
-    generatePDF('pdf-presupuesto', filename);}
+    generatePDF('pdf-presupuesto', `Presupuesto_${cliente}_${formatDateFile(fecha)}`);
+}
 
 // Generar PDF de Recibo
 function generarPDFRecibo() {
@@ -150,12 +146,8 @@ function generarPDFRecibo() {
     const detalle = document.getElementById('recibo-detalle').value;
     const importe = document.getElementById('recibo-importe').value;
     
-    // Obtener fecha del evento
-    const fechaEvento = document.getElementById('recibo-fecha-evento').value;
-
     // Actualizar contenido del PDF
     document.getElementById('pdf-recibo-fecha').textContent = formatDate(fecha);
-    document.getElementById('pdf-recibo-fecha-evento').textContent = formatDate(fechaEvento);
     document.getElementById('pdf-recibo-salon').textContent = salon;
     document.getElementById('pdf-recibo-evento').textContent = evento;
     document.getElementById('pdf-recibo-cliente').textContent = cliente;
@@ -163,211 +155,109 @@ function generarPDFRecibo() {
     document.getElementById('pdf-recibo-importe').textContent = formatCurrency(importe);
     
     // Generar PDF
-    const filename = `Recibo_${formatDateFile(fecha)}`;
-    generatePDF('pdf-recibo', filename);}
-
+    generatePDF('pdf-recibo', `Recibo_${cliente}_${formatDateFile(fecha)}`);
+}
 
 // Función para generar PDF usando html2canvas y jsPDF
 // Función optimizada para generar PDF
 // Función optimizada para generar PDF
-// Función optimizada para generar PDF
-function generarPDF() {
+function generatePDF(elementId, filename) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
     
-    // Obtener el nombre del cliente
-    const clienteInput = document.getElementById('cliente');
-    const nombreCliente = clienteInput ? clienteInput.value : 'Cliente';
+    // Mostrar temporalmente el elemento para capturarlo
+    const element = document.getElementById(elementId);
+    element.style.position = 'absolute';
+    element.style.left = '0';
+    element.style.top = '0';
+    element.style.width = '100%';
+    element.style.opacity = '1';
+    element.style.visibility = 'visible';
+    element.style.display = 'block';
     
-    // Configuración de fuentes y colores
-    doc.setFillColor(52, 152, 219);
-    doc.rect(0, 0, 210, 40, 'F');
-
-    // Eliminar logo temporal o base64
-    // const logoBase64 = 'data:image/png;base64,'; 
-    // doc.addImage(logoBase64, 'PNG', 150, 5, 30, 30);
+    // Determinar escala óptima basada en el dispositivo
+    const scale = isMobile() ? 1.5 : 2;
     
-    // Encabezado
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20); // Reducir tamaño de fuente
-    doc.text('CARLOS HOMOLA', 20, 20);
-    doc.setFontSize(12); // Reducir tamaño de fuente
-    doc.setFont("helvetica", "normal");
-    doc.text('Servicios Integrales', 20, 30);
-
-    // Información del presupuesto
-    doc.setTextColor(44, 62, 80);
-    doc.setFontSize(12); // Reducir tamaño de fuente
-    doc.text('PRESUPUESTO', 20, 50);
-    
-    // Línea divisoria
-    doc.setDrawColor(52, 152, 219);
-    doc.setLineWidth(0.5);
-    doc.line(20, 55, 190, 55);
-    
-    // Datos del cliente con fecha formateada
-    doc.setFontSize(10); // Reducir tamaño de fuente
-    const fechaFormateada = formatearFecha(document.getElementById('fecha').value);
-    doc.text(`Fecha: ${fechaFormateada}`, 20, 65);
-    doc.text(`Cliente: ${nombreCliente}`, 20, 75);
-
-    // Tabla de items
-    let y = 90;
-    doc.setFillColor(241, 196, 15);
-    doc.rect(20, y - 10, 170, 10, 'F');
-    doc.setTextColor(0, 0, 0);
-    doc.text('DESCRIPCIÓN', 25, y - 2);
-    doc.text('IMPORTE', 150, y - 2);
-    
-    const items = document.querySelectorAll('.item-row');
-    items.forEach((item, index) => {
-        const trabajo = item.querySelector('.trabajo').value;
-        const importe = Number(item.querySelector('.importe').value);
-        
-        if (trabajo && importe) {
-            const maxWidth = 90;
-            doc.setFontSize(10); // Reducir tamaño de fuente
+    // Crear PDF
+    html2canvas(element, { 
+        scale: scale,
+        backgroundColor: '#000000',
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        onclone: function(clonedDoc) {
+            const clonedElement = clonedDoc.getElementById(elementId);
+            clonedElement.style.height = 'auto';
+            clonedElement.style.width = '100%';
+            clonedElement.style.maxWidth = '100%';
             
-            let lines = doc.splitTextToSize(trabajo, maxWidth);
-            
-            const lineHeight = 6;
-            const textHeight = lines.length * lineHeight;
-            const rowHeight = Math.max(10, textHeight);
-            
-            if (index % 2 === 0) {
-                doc.setFillColor(245, 245, 245);
-                doc.rect(20, y, 170, rowHeight, 'F');
-            }
-            
-            doc.text(lines, 25, y + 7);
-            doc.text(`$ ${formatearNumero(importe)}`, 150, y + (rowHeight/2));
-            
-            y += rowHeight;
-        }
-    });    
-        
-    // Total
-    doc.setFillColor(52, 152, 219);
-    doc.rect(20, y + 5, 170, 12, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
-    const totalText = document.getElementById('total').textContent;
-    doc.text(`TOTAL: ${totalText}`, 25, y + 13);
-    
-    // Pie de página
-    doc.setTextColor(128, 128, 128);
-    doc.setFontSize(8);
-    doc.text('Carlos Homola', 20, y + 30);
-    doc.text('San Rafael / Cel: 2604-08-5532', 20, y + 35);
-    
-    // Generar y compartir PDF
-    const pdfOutput = doc.output('blob');
-    const pdfFile = new File([pdfOutput], `Presupuesto ${nombreCliente}.pdf`, { type: 'application/pdf' });
-    
-    // Función para compartir o descargar
-    function compartirODescargar() {
-        // Método principal: Web Share API
-        if (navigator.share) {
-            navigator.share({
-                files: [pdfFile],
-                title: `Presupuesto ${nombreCliente}`
-            }).catch(err => {
-                console.error('Error al compartir:', err);
-                descargarPDF();
+            // Remove or hide problematic images
+            const logoElements = clonedElement.querySelectorAll('.pdf-logo img');
+            logoElements.forEach(img => {
+                img.removeAttribute('src');
+                img.style.display = 'none';
             });
-        } 
-        // Método alternativo: crear enlace de descarga
-        else {
-            descargarPDF();
         }
-    }
-    
-    // Función de descarga
-    function descargarPDF() {
-        const url = URL.createObjectURL(pdfFile);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Presupuesto ${nombreCliente}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-    
-    // Intentar compartir o descargar
-    try {
-        // Verificar si es un dispositivo móvil
-        const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
         
-        if (esMobile) {
-            compartirODescargar();
-        } else {
-            descargarPDF();
+        // Crear PDF con dimensiones apropiadas
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        // Calcular proporciones para mantener aspecto original
+        const pdfWidth = 210; // Ancho de A4
+        const pdfHeight = 297; // Alto de A4
+        
+        // Calcular tamaño de imagen ajustado al PDF con margen
+        const margin = 10; // 10mm de margen
+        const imgWidth = pdfWidth - (margin * 2);
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Rellenar la página con negro
+        pdf.setFillColor(0, 0, 0);
+        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+        
+        // Añadir la imagen centrada con margen
+        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+        
+        pdf.save(`${filename}.pdf`);
+        
+        // Restaurar estado original del elemento
+        element.style.position = 'static';
+        element.style.left = 'auto';
+        element.style.top = 'auto';
+        element.style.width = 'auto';
+        element.style.opacity = '0';
+        element.style.visibility = 'hidden';
+        element.style.display = 'none';
+        
+        // Si es móvil, intentar compartir el archivo
+        if (isMobile()) {
+            const blob = pdf.output('blob');
+            const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
+            
+            if (navigator.share) {
+                navigator.share({
+                    files: [file],
+                    title: filename,
+                }).catch((error) => {
+                    console.error('Error compartiendo archivo:', error);
+                });
+            }
         }
-    } catch (error) {
-        console.error('Error al generar el PDF:', error);
-        alert('Hubo un error al generar el PDF. Por favor, intente nuevamente.');
-    }
-}
-// Función mejorada para compartir en dispositivos móviles
-function sharePDFOnMobile(pdfBlob, filename) {
-    // Crear URL del archivo
-    const fileURL = URL.createObjectURL(pdfBlob);
-    
-    // Método 1: Usar Web Share API si está disponible
-    if (navigator.share) {
-        const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+    }).catch(error => {
+        console.error('Error al generar PDF:', error);
+        alert('Hubo un problema al generar el PDF. Intente nuevamente.');
         
-        navigator.share({
-            files: [file],
-            title: filename
-        }).catch(console.error);
-    } 
-    // Método 2: Abrir directamente para descargar/compartir
-    else {
-        const downloadLink = document.createElement('a');
-        downloadLink.href = fileURL;
-        downloadLink.download = filename;
-        
-        // Añadir al body y simular clic
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        
-        // Limpiar
-        setTimeout(() => {
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(fileURL);
-        }, 100);
-    }
+        // Restaurar estado original del elemento en caso de error
+        element.style.position = 'static';
+        element.style.left = 'auto';
+        element.style.top = 'auto';
+        element.style.width = 'auto';
+        element.style.opacity = '0';
+        element.style.visibility = 'hidden';
+        element.style.display = 'none';
+    });
 }
-
-// Función para detectar dispositivos móviles (mejorada)
-function isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// Función auxiliar para descarga de PDF
-function fallbackDownload(pdfBlob, filename) {
-    const fileURL = URL.createObjectURL(pdfBlob);
-    const downloadLink = document.createElement('a');
-    downloadLink.href = fileURL;
-    downloadLink.download = filename;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    
-    // Limpiar después de un breve tiempo
-    setTimeout(() => {
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(fileURL);
-    }, 100);
-}
-
-// Función auxiliar para detectar si es móvil
-function isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
 
 // Detectar si es dispositivo móvil
 function isMobile() {
@@ -396,10 +286,3 @@ window.onload = function() {
     // Agregar un extra por defecto
     agregarExtra();
 };
-// Enviar por WhatsApp con mensaje dinámico
-function enviarPorWhatsApp(tipo, salon, fecha) {
-    const tipoTexto = tipo === 'presupuesto' ? 'Presupuesto' : 'Recibo';
-    const mensaje = `${tipoTexto} para el salón ${salon} con fecha ${formatDate(fecha)}`;
-    const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-}
