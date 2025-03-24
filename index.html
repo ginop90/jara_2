@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,10 +49,6 @@
                     <input type="text" id="presupuesto-salon" name="salon" placeholder="Nombre del salón">
                 </div>
                 
-                <div class="form-group">
-                    <label for="presupuesto-fecha-evento">Fecha del Evento:</label>
-                    <input type="date" id="presupuesto-fecha-evento" name="fecha_evento">
-                </div>
                 <div class="form-group">
                     <label for="presupuesto-evento">Tipo de Evento:</label>
                     <input type="text" id="presupuesto-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
@@ -118,10 +113,6 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="recibo-fecha-evento">Fecha del Evento:</label>
-                    <input type="date" id="recibo-fecha-evento" name="fecha_evento">
-                </div>
-                <div class="form-group">
                     <label for="recibo-evento">Tipo de Evento:</label>
                     <input type="text" id="recibo-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
                 </div>
@@ -154,11 +145,14 @@
         <!-- Contenido para PDF Presupuesto -->
         <div id="pdf-presupuesto" class="pdf-content">
             <div class="pdf-header">
-                <div class="pdf-header-text">
-                    <div class="pdf-header-title">Jara DJ Group</div>
-                    <div class="pdf-header-subtitle">DJs, Sonido e Iluminación</div>
+                <div class="pdf-header-logo-container">
+                    <div class="pdf-header-logo">
+                        <!-- Use a base64 encoded image or remove src entirely -->
+                        <img src="data:image/png;base64,..." alt="Jara DJ's Logo">
+                    </div>
+                    <div class="pdf-header-title">Jara DJ's</div>
+                    <div class="pdf-header-subtitle">Sonido e Iluminación</div>
                 </div>
-                <div class="pdf-logo"></div>
             </div>
             <div class="pdf-title">PRESUPUESTO</div>
             <div class="pdf-body">
@@ -169,10 +163,6 @@
                 <div class="pdf-row">
                     <div class="pdf-row-label">Salón:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-salon"></div>
-                </div>
-                <div class="pdf-row">
-                    <div class="pdf-row-label">Fecha del Evento:</div>
-                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
@@ -203,11 +193,14 @@
         <!-- Contenido para PDF Recibo -->
         <div id="pdf-recibo" class="pdf-content">
             <div class="pdf-header">
-                <div class="pdf-header-text">
-                    <div class="pdf-header-title">Jara DJ Group</div>
-                    <div class="pdf-header-subtitle">DJs, Sonido e Iluminación</div>
+                <div class="pdf-header-logo-container">
+                    <div class="pdf-header-logo">
+                        <!-- Use a base64 encoded image or remove src entirely -->
+                        <img src="data:image/png;base64,..." alt="Jara DJ's Logo">
+                    </div>
+                    <div class="pdf-header-title">Jara DJ's</div>
+                    <div class="pdf-header-subtitle">Sonido e Iluminación</div>
                 </div>
-                <div class="pdf-logo"></div>
             </div>
             <div class="pdf-title">RECIBO</div>
             <div class="pdf-body">
@@ -218,10 +211,6 @@
                 <div class="pdf-row">
                     <div class="pdf-row-label">Salón:</div>
                     <div class="pdf-row-value" id="pdf-recibo-salon"></div>
-                </div>
-                <div class="pdf-row">
-                    <div class="pdf-row-label">Fecha del Evento:</div>
-                    <div class="pdf-row-value" id="pdf-recibo-fecha-evento"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
