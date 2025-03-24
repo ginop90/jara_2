@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -49,6 +50,10 @@
                     <input type="text" id="presupuesto-salon" name="salon" placeholder="Nombre del salón">
                 </div>
                 
+                <div class="form-group">
+                    <label for="presupuesto-fecha-evento">Fecha del Evento:</label>
+                    <input type="date" id="presupuesto-fecha-evento" name="fecha_evento">
+                </div>
                 <div class="form-group">
                     <label for="presupuesto-evento">Tipo de Evento:</label>
                     <input type="text" id="presupuesto-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
@@ -113,6 +118,10 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="recibo-fecha-evento">Fecha del Evento:</label>
+                    <input type="date" id="recibo-fecha-evento" name="fecha_evento">
+                </div>
+                <div class="form-group">
                     <label for="recibo-evento">Tipo de Evento:</label>
                     <input type="text" id="recibo-evento" name="evento" placeholder="Ej: Casamiento, Fiesta de 15, etc.">
                 </div>
@@ -163,6 +172,10 @@
                     <div class="pdf-row-value" id="pdf-presupuesto-salon"></div>
                 </div>
                 <div class="pdf-row">
+                    <div class="pdf-row-label">Fecha del Evento:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
+                </div>
+                <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-evento"></div>
                 </div>
@@ -206,6 +219,14 @@
                 <div class="pdf-row">
                     <div class="pdf-row-label">Salón:</div>
                     <div class="pdf-row-value" id="pdf-recibo-salon"></div>
+                </div>
+                <div class="pdf-row">
+                    <div class="pdf-row-label">Fecha del Evento:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
+                </div>
+                <div class="pdf-row">
+                    <div class="pdf-row-label">Fecha del Evento:</div>
+                    <div class="pdf-row-value" id="pdf-recibo-fecha-evento"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Evento:</div>
