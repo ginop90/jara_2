@@ -171,77 +171,145 @@ function generarPDFRecibo() {
 // Función optimizada para generar PDF
 // Función optimizada para generar PDF
 // Función optimizada para generar PDF
-function generatePDF(elementId, filename) {
+function generarPDF() {
     const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
     
-    // Mostrar temporalmente el elemento para capturarlo
-    const element = document.getElementById(elementId);
-    element.style.display = 'block';
+    // Obtener el nombre del cliente
+    const clienteInput = document.getElementById('cliente');
+    const nombreCliente = clienteInput ? clienteInput.value : 'Cliente';
     
-    // Determinar escala óptima basada en el dispositivo
-    const scale = isMobile() ? 2 : 2;
-    
-    // Crear PDF
-    html2canvas(element, { 
-        scale: scale,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        onclone: function(clonedDoc) {
-            const clonedElement = clonedDoc.getElementById(elementId);
-            // Asegurarse que el contenedor tiene altura adecuada
-            clonedElement.style.height = 'auto';
-            clonedElement.style.width = '100%';
-            clonedElement.style.maxWidth = '100%';
-            clonedElement.style.paddingBottom = '0';
-            clonedElement.style.margin = '0';
-            
-            // Asegurar que todos los elementos internos sean visibles
-            const allElements = clonedElement.querySelectorAll('*');
-            allElements.forEach(el => {
-                el.style.overflow = 'visible';
-            });
-        }
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        
-        // Crear PDF con dimensiones optimizadas para móvil
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        // Calcular proporciones para mantener aspecto original
-        const pdfWidth = 210; // Ancho de A4
-        const pdfHeight = 297; // Alto de A4
-        
-        // Calcular tamaño de imagen ajustado al PDF con margen
-        const margin = 5; // Margen reducido
-        const imgWidth = pdfWidth - (margin * 2);
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        // Añadir la imagen centrada con margen
-        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-        
-        // Generar Blob del PDF
-        const pdfOutput = pdf.output('blob');
-        
-        // Guardar o compartir PDF
-        if (isMobile()) {
-            // Método de compartir mejorado para dispositivos móviles
-            sharePDFOnMobile(pdfOutput, `${filename}.pdf`);
-        } else {
-            // Descargar directamente en escritorio
-            pdf.save(`${filename}.pdf`);
-        }
-        
-        // Ocultar el elemento después de la captura
-        element.style.display = 'none';
-    }).catch(error => {
-        console.error('Error al generar PDF:', error);
-        alert('Hubo un problema al generar el PDF. Intente nuevamente.');
-        element.style.display = 'none';
-    });
-}
+    // Configuración de fuentes y colores
+    doc.setFillColor(52, 152, 219);
+    doc.rect(0, 0, 210, 40, 'F');
 
+    // Eliminar logo temporal o base64
+    // const logoBase64 = 'data:image/png;base64,'; 
+    // doc.addImage(logoBase64, 'PNG', 150, 5, 30, 30);
+    
+    // Encabezado
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20); // Reducir tamaño de fuente
+    doc.text('CARLOS HOMOLA', 20, 20);
+    doc.setFontSize(12); // Reducir tamaño de fuente
+    doc.setFont("helvetica", "normal");
+    doc.text('Servicios Integrales', 20, 30);
+
+    // Información del presupuesto
+    doc.setTextColor(44, 62, 80);
+    doc.setFontSize(12); // Reducir tamaño de fuente
+    doc.text('PRESUPUESTO', 20, 50);
+    
+    // Línea divisoria
+    doc.setDrawColor(52, 152, 219);
+    doc.setLineWidth(0.5);
+    doc.line(20, 55, 190, 55);
+    
+    // Datos del cliente con fecha formateada
+    doc.setFontSize(10); // Reducir tamaño de fuente
+    const fechaFormateada = formatearFecha(document.getElementById('fecha').value);
+    doc.text(`Fecha: ${fechaFormateada}`, 20, 65);
+    doc.text(`Cliente: ${nombreCliente}`, 20, 75);
+
+    // Tabla de items
+    let y = 90;
+    doc.setFillColor(241, 196, 15);
+    doc.rect(20, y - 10, 170, 10, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.text('DESCRIPCIÓN', 25, y - 2);
+    doc.text('IMPORTE', 150, y - 2);
+    
+    const items = document.querySelectorAll('.item-row');
+    items.forEach((item, index) => {
+        const trabajo = item.querySelector('.trabajo').value;
+        const importe = Number(item.querySelector('.importe').value);
+        
+        if (trabajo && importe) {
+            const maxWidth = 90;
+            doc.setFontSize(10); // Reducir tamaño de fuente
+            
+            let lines = doc.splitTextToSize(trabajo, maxWidth);
+            
+            const lineHeight = 6;
+            const textHeight = lines.length * lineHeight;
+            const rowHeight = Math.max(10, textHeight);
+            
+            if (index % 2 === 0) {
+                doc.setFillColor(245, 245, 245);
+                doc.rect(20, y, 170, rowHeight, 'F');
+            }
+            
+            doc.text(lines, 25, y + 7);
+            doc.text(`$ ${formatearNumero(importe)}`, 150, y + (rowHeight/2));
+            
+            y += rowHeight;
+        }
+    });    
+        
+    // Total
+    doc.setFillColor(52, 152, 219);
+    doc.rect(20, y + 5, 170, 12, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    const totalText = document.getElementById('total').textContent;
+    doc.text(`TOTAL: ${totalText}`, 25, y + 13);
+    
+    // Pie de página
+    doc.setTextColor(128, 128, 128);
+    doc.setFontSize(8);
+    doc.text('Carlos Homola', 20, y + 30);
+    doc.text('San Rafael / Cel: 2604-08-5532', 20, y + 35);
+    
+    // Generar y compartir PDF
+    const pdfOutput = doc.output('blob');
+    const pdfFile = new File([pdfOutput], `Presupuesto ${nombreCliente}.pdf`, { type: 'application/pdf' });
+    
+    // Función para compartir o descargar
+    function compartirODescargar() {
+        // Método principal: Web Share API
+        if (navigator.share) {
+            navigator.share({
+                files: [pdfFile],
+                title: `Presupuesto ${nombreCliente}`
+            }).catch(err => {
+                console.error('Error al compartir:', err);
+                descargarPDF();
+            });
+        } 
+        // Método alternativo: crear enlace de descarga
+        else {
+            descargarPDF();
+        }
+    }
+    
+    // Función de descarga
+    function descargarPDF() {
+        const url = URL.createObjectURL(pdfFile);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Presupuesto ${nombreCliente}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    
+    // Intentar compartir o descargar
+    try {
+        // Verificar si es un dispositivo móvil
+        const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (esMobile) {
+            compartirODescargar();
+        } else {
+            descargarPDF();
+        }
+    } catch (error) {
+        console.error('Error al generar el PDF:', error);
+        alert('Hubo un error al generar el PDF. Por favor, intente nuevamente.');
+    }
+}
 // Función mejorada para compartir en dispositivos móviles
 function sharePDFOnMobile(pdfBlob, filename) {
     // Crear URL del archivo
