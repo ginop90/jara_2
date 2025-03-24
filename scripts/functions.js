@@ -181,73 +181,77 @@ function generatePDF(elementId, filename) {
     // Determinar escala óptima basada en el dispositivo
     const scale = isMobile() ? 2 : 2;
     
+    // Crear PDF
     html2canvas(element, { 
         scale: scale,
-        backgroundColor: '#ffffff', // Cambio de negro a blanco para mejor visualización
+        backgroundColor: '#ffffff', // Cambié de negro a blanco
         useCORS: true,
         allowTaint: true,
-        logging: false,
+        logging: false, // Desactivar logs para mejor rendimiento
+        // Solo capturar el elemento exacto
         onclone: function(clonedDoc) {
             const clonedElement = clonedDoc.getElementById(elementId);
-            // Optimizar estilo de captura
+            // Asegurarse que el contenedor tiene altura adecuada
             clonedElement.style.height = 'auto';
             clonedElement.style.width = '100%';
             clonedElement.style.maxWidth = '100%';
             clonedElement.style.paddingBottom = '0';
             clonedElement.style.margin = '0';
             
-            // Asegurar visibilidad de elementos internos
+            // Reducir el tamaño de las fuentes para evitar desbordamientos
             const allElements = clonedElement.querySelectorAll('*');
             allElements.forEach(el => {
                 el.style.overflow = 'visible';
+                // Intentar reducir tamaños de fuente
+                if (el.tagName !== 'IMG') {
+                    el.style.fontSize = 'smaller';
+                }
             });
         }
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         
-        // Crear PDF con dimensiones de A4
+        // Crear PDF con dimensiones optimizadas para móvil
         const pdf = new jsPDF('p', 'mm', 'a4');
         
-        // Configuraciones de página
-        const pdfWidth = 210;
-        const pdfHeight = 297;
-        const margin = 10; // Margen ligeramente más amplio
+        // Calcular proporciones para mantener aspecto original
+        const pdfWidth = 210; // Ancho de A4
+        const pdfHeight = 297; // Alto de A4
         
-        // Color de fondo azul claro inspirado en Homola
-        pdf.setFillColor(52, 152, 219, 0.1); // Azul con opacidad
-        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-        
-        // Calcular tamaño de imagen ajustado
+        // Calcular tamaño de imagen ajustado al PDF con margen
+        const margin = 10; // Aumenté margen para más espacio
         const imgWidth = pdfWidth - (margin * 2);
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        // Añadir la imagen centrada
+        // Fondo blanco en lugar de negro
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+        
+        // Añadir la imagen centrada con margen
         pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight, '', 'FAST');
         
-        // Comprimir y generar PDF
+        // Comprimir el PDF para hacerlo más pequeño
         const pdfOutput = pdf.output('blob', {
             compress: true,
-            precision: 2
+            precision: 2 // Reducir precisión para archivo más pequeño
         });
         
-        // Guardar o compartir PDF
+        // Guardar PDF
         try {
-            // Nombre de archivo con formato de Homola
-            const formattedFilename = `${filename}.pdf`;
-            const file = new File([pdfOutput], formattedFilename, { type: 'application/pdf' });
+            pdf.save(`${filename}.pdf`);
             
-            // Compartir en dispositivos móviles
-            if (isMobile() && navigator.share && navigator.canShare({ files: [file] })) {
-                navigator.share({
-                    files: [file],
-                    title: filename,
-                }).catch((error) => {
-                    console.error('Error compartiendo archivo:', error);
-                    fallbackDownload(pdfOutput, formattedFilename);
-                });
-            } else {
-                // Descargar en escritorio o si compartir falla
-                fallbackDownload(pdfOutput, formattedFilename);
+            // Intento de compartir en móvil
+            if (isMobile()) {
+                const file = new File([pdfOutput], `${filename}.pdf`, { type: 'application/pdf' });
+                
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                    navigator.share({
+                        files: [file],
+                        title: filename,
+                    }).catch((error) => {
+                        console.error('Error compartiendo archivo:', error);
+                    });
+                }
             }
         } catch (error) {
             console.error('Error al generar PDF:', error);
