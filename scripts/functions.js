@@ -138,9 +138,7 @@ function generarPDFPresupuesto() {
     
     // Generar PDF
     const filename = `Presupuesto_${formatDateFile(fecha)}`;
-    generatePDF('pdf-presupuesto', filename);
-    enviarPorWhatsApp('presupuesto', salon, fecha);
-}
+    generatePDF('pdf-presupuesto', filename);}
 
 // Generar PDF de Recibo
 function generarPDFRecibo() {
@@ -166,9 +164,7 @@ function generarPDFRecibo() {
     
     // Generar PDF
     const filename = `Recibo_${formatDateFile(fecha)}`;
-    generatePDF('pdf-recibo', filename);
-    enviarPorWhatsApp('recibo', salon, fecha);
-}
+    generatePDF('pdf-recibo', filename);}
 
 // Función para generar PDF usando html2canvas y jsPDF
 // Función optimizada para generar PDF
