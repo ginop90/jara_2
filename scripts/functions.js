@@ -184,11 +184,10 @@ function generatePDF(elementId, filename) {
     // Crear PDF
     html2canvas(element, { 
         scale: scale,
-        backgroundColor: '#ffffff', // Cambié de negro a blanco
+        backgroundColor: '#ffffff',
         useCORS: true,
         allowTaint: true,
-        logging: false, // Desactivar logs para mejor rendimiento
-        // Solo capturar el elemento exacto
+        logging: false,
         onclone: function(clonedDoc) {
             const clonedElement = clonedDoc.getElementById(elementId);
             // Asegurarse que el contenedor tiene altura adecuada
@@ -198,14 +197,10 @@ function generatePDF(elementId, filename) {
             clonedElement.style.paddingBottom = '0';
             clonedElement.style.margin = '0';
             
-            // Reducir el tamaño de las fuentes para evitar desbordamientos
+            // Asegurar que todos los elementos internos sean visibles
             const allElements = clonedElement.querySelectorAll('*');
             allElements.forEach(el => {
                 el.style.overflow = 'visible';
-                // Intentar reducir tamaños de fuente
-                if (el.tagName !== 'IMG') {
-                    el.style.fontSize = 'smaller';
-                }
             });
         }
     }).then(canvas => {
@@ -219,43 +214,23 @@ function generatePDF(elementId, filename) {
         const pdfHeight = 297; // Alto de A4
         
         // Calcular tamaño de imagen ajustado al PDF con margen
-        const margin = 10; // Aumenté margen para más espacio
+        const margin = 5; // Margen reducido
         const imgWidth = pdfWidth - (margin * 2);
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        // Fondo blanco en lugar de negro
-        pdf.setFillColor(255, 255, 255);
-        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-        
         // Añadir la imagen centrada con margen
-        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight, '', 'FAST');
+        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
         
-        // Comprimir el PDF para hacerlo más pequeño
-        const pdfOutput = pdf.output('blob', {
-            compress: true,
-            precision: 2 // Reducir precisión para archivo más pequeño
-        });
+        // Generar Blob del PDF
+        const pdfOutput = pdf.output('blob');
         
-        // Guardar PDF
-        try {
+        // Guardar o compartir PDF
+        if (isMobile()) {
+            // Método de compartir mejorado para dispositivos móviles
+            sharePDFOnMobile(pdfOutput, `${filename}.pdf`);
+        } else {
+            // Descargar directamente en escritorio
             pdf.save(`${filename}.pdf`);
-            
-            // Intento de compartir en móvil
-            if (isMobile()) {
-                const file = new File([pdfOutput], `${filename}.pdf`, { type: 'application/pdf' });
-                
-                if (navigator.share && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        files: [file],
-                        title: filename,
-                    }).catch((error) => {
-                        console.error('Error compartiendo archivo:', error);
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error al generar PDF:', error);
-            alert('Hubo un problema al generar el PDF. Intente nuevamente.');
         }
         
         // Ocultar el elemento después de la captura
@@ -265,6 +240,43 @@ function generatePDF(elementId, filename) {
         alert('Hubo un problema al generar el PDF. Intente nuevamente.');
         element.style.display = 'none';
     });
+}
+
+// Función mejorada para compartir en dispositivos móviles
+function sharePDFOnMobile(pdfBlob, filename) {
+    // Crear URL del archivo
+    const fileURL = URL.createObjectURL(pdfBlob);
+    
+    // Método 1: Usar Web Share API si está disponible
+    if (navigator.share) {
+        const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+        
+        navigator.share({
+            files: [file],
+            title: filename
+        }).catch(console.error);
+    } 
+    // Método 2: Abrir directamente para descargar/compartir
+    else {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileURL;
+        downloadLink.download = filename;
+        
+        // Añadir al body y simular clic
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        
+        // Limpiar
+        setTimeout(() => {
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(fileURL);
+        }, 100);
+    }
+}
+
+// Función para detectar dispositivos móviles (mejorada)
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 // Función auxiliar para descarga de PDF
