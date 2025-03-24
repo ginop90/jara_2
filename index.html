@@ -800,19 +800,19 @@
                 element.style.display = 'none';
                 
                 // Si es móvil, intentar compartir el archivo
-                if (isMobile()) {
-                    const blob = pdf.output('blob');
-                    const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
-                    
-                    if (navigator.share) {
-                        navigator.share({
-                            files: [file],
-                            title: filename,
-                        }).catch((error) => {
-                            console.error('Error compartiendo archivo:', error);
-                        });
-                    }
-                }
+                //if (isMobile()) {
+                //    const blob = pdf.output('blob');
+                //    const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
+                //    
+                //    if (navigator.share) {
+                //        navigator.share({
+                //            files: [file],
+                //            title: filename,
+                //        }).catch((error) => {
+                //            console.error('Error compartiendo archivo:', error);
+                //        });
+                //    }
+                //}
             });
         }
         
