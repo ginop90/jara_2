@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -200,7 +199,6 @@
             display: none;
         }
 
-        /* Estilos para extras */
         .extras-container {
             margin-top: 20px;
         }
@@ -246,7 +244,6 @@
             color: white;
         }
 
-        /* Responsive */
         @media (min-width: 768px) {
             .main-options {
                 flex-direction: row;
@@ -257,7 +254,6 @@
             }
         }
 
-        /* Estilos para PDF */
         .pdf-content {
             background-color: black;
             color: white;
@@ -271,8 +267,9 @@
             padding: 15px;
             margin-bottom: 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            text-align: center;
         }
 
         .pdf-logo {
@@ -285,61 +282,25 @@
             align-items: center;
             font-size: 16px;
             color: white;
-        }
-
-        .pdf-title {
-            font-size: 22px;
-        }
-
-        .pdf-body {
-            padding: 15px;
-        }
-
-        .pdf-row {
             margin-bottom: 10px;
-            display: flex;
-            text-align: left;
         }
 
-        .pdf-row-label {
-            width: 120px;
+        .pdf-company-name {
+            font-size: 22px;
             font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .pdf-row-value {
-            flex: 1;
+        .pdf-company-subtitle {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 15px;
         }
 
-        .pdf-detail {
-            white-space: pre-wrap;
-            text-align: left;
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
-
-        .pdf-extra-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            text-align: left;
-        }
-
-        .pdf-extra-name {
-            width: 70%;
-            text-align: left;
-        }
-
-        .pdf-extra-amount {
-            width: 30%;
-            text-align: right;
-        }
-
-        .pdf-total {
-            margin-top: 20px;
-            border-top: 2px solid #444;
-            padding-top: 10px;
-            text-align: right;
+        .pdf-document-type {
+            font-size: 18px;
             font-weight: bold;
+            margin-bottom: 10px;
         }
 
         hr {
@@ -485,9 +446,14 @@
         <div id="pdf-presupuesto" class="pdf-content">
             <div class="pdf-header">
                 <div class="pdf-logo">Logo</div>
-                <div class="pdf-title">PRESUPUESTO - Jara DJ's, sonido e iluminación</div>
+                <div class="pdf-company-name">Jara DJ Group</div>
+                <div class="pdf-company-subtitle">DJ, Sonido e Iluminación</div>
             </div>
             <div class="pdf-body">
+                <div class="pdf-row">
+                    <div class="pdf-document-type">PRESUPUESTO</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-fecha"></div>
+                </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Fecha:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-fecha"></div>
@@ -526,9 +492,14 @@
         <div id="pdf-recibo" class="pdf-content">
             <div class="pdf-header">
                 <div class="pdf-logo">Logo</div>
-                <div class="pdf-title">RECIBO - Jara DJ's, sonido e iluminación</div>
+                <div class="pdf-company-name">Jara DJ Group</div>
+                <div class="pdf-company-subtitle">DJ, Sonido e Iluminación</div>
             </div>
             <div class="pdf-body">
+                <div class="pdf-row">
+                    <div class="pdf-document-type">RECIBO</div>
+                    <div class="pdf-row-value" id="pdf-recibo-fecha"></div>
+                </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Fecha:</div>
                     <div class="pdf-row-value" id="pdf-recibo-fecha"></div>
@@ -720,73 +691,57 @@
         
         // Función para generar PDF usando html2canvas y jsPDF
         function generatePDF(elementId, filename) {
-    const { jsPDF } = window.jspdf;
-    
-    // Mostrar temporalmente el elemento para capturarlo
-    const element = document.getElementById(elementId);
-    element.style.display = 'block';
-    
-    html2canvas(element, { 
-        scale: 2,
-        backgroundColor: '#000000'
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
-        const pageHeight = 297;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-        
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-        
-        // Modificación para móviles
-        if (isMobile()) {
-            const blob = pdf.output('blob');
-            const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
+            const { jsPDF } = window.jspdf;
             
-            // Intento de compartir o descargar
-            if (navigator.share) {
-                navigator.share({
-                    files: [file],
-                    title: filename,
-                }).catch((error) => {
-                    console.error('Error compartiendo archivo:', error);
-                    // Respaldo: crear enlace de descarga
-                    downloadPDF(pdf, filename);
-                });
-            } else {
-                // Respaldo para navegadores que no soporten share
-                downloadPDF(pdf, filename);
-            }
-        } else {
-            // Para escritorio, guardar normalmente
-            pdf.save(`${filename}.pdf`);
+            // Mostrar temporalmente el elemento para capturarlo
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            
+            // Crear PDF
+            html2canvas(element, { 
+                scale: 2,
+                backgroundColor: '#000000'
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(`${filename}.pdf`);
+                
+                // Ocultar el elemento después de la captura
+                element.style.display = 'none';
+                
+                // Si es móvil, intentar compartir el archivo
+                if (isMobile()) {
+                    const blob = pdf.output('blob');
+                    const file = new File([blob], `${filename}.pdf`, { type: 'application/pdf' });
+                    
+                    if (navigator.share) {
+                        navigator.share({
+                            files: [file],
+                            title: filename,
+                        }).catch((error) => {
+                            console.error('Error compartiendo archivo:', error);
+                        });
+                    }
+                }
+            });
         }
         
-        // Ocultar el elemento después de la captura
-        element.style.display = 'none';
-    });
-}
-
-// Nueva función para descargar PDF
-function downloadPDF(pdf, filename) {
-    const blob = pdf.output('blob');
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${filename}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
         // Detectar si es dispositivo móvil
         function isMobile() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
