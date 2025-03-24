@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -53,6 +52,13 @@
             text-align: center;
             font-size: 28px;
             color: #f5f5f5;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ccc;
         }
 
         nav {
@@ -200,7 +206,6 @@
             display: none;
         }
 
-        /* Estilos para extras */
         .extras-container {
             margin-top: 20px;
         }
@@ -246,7 +251,6 @@
             color: white;
         }
 
-        /* Responsive */
         @media (min-width: 768px) {
             .main-options {
                 flex-direction: row;
@@ -257,7 +261,6 @@
             }
         }
 
-        /* Estilos para PDF */
         .pdf-content {
             background-color: black;
             color: white;
@@ -375,12 +378,17 @@
                 ← Volver
             </button>
             
-            <h1>Generar Presupuesto <span class="emoji">📝</span></h1>
+            <div class="page-title">Generar Presupuesto <span class="emoji">📝</span></div>
             
             <div class="form-section">
                 <div class="form-group">
                     <label for="presupuesto-fecha">Fecha:</label>
                     <input type="date" id="presupuesto-fecha" name="fecha">
+                </div>
+                
+                <div class="form-group">
+                    <label for="presupuesto-fecha-evento">Fecha Evento:</label>
+                    <input type="date" id="presupuesto-fecha-evento" name="fecha-evento">
                 </div>
                 
                 <div class="form-group">
@@ -438,12 +446,17 @@
                 ← Volver
             </button>
             
-            <h1>Generar Recibo <span class="emoji">🧾</span></h1>
+            <div class="page-title">Generar Recibo <span class="emoji">🧾</span></div>
             
             <div class="form-section">
                 <div class="form-group">
                     <label for="recibo-fecha">Fecha:</label>
                     <input type="date" id="recibo-fecha" name="fecha">
+                </div>
+                
+                <div class="form-group">
+                    <label for="recibo-fecha-evento">Fecha Evento:</label>
+                    <input type="date" id="recibo-fecha-evento" name="fecha-evento">
                 </div>
                 
                 <div class="form-group">
@@ -493,6 +506,10 @@
                     <div class="pdf-row-value" id="pdf-presupuesto-fecha"></div>
                 </div>
                 <div class="pdf-row">
+                    <div class="pdf-row-label">Fecha Evento:</div>
+                    <div class="pdf-row-value" id="pdf-presupuesto-fecha-evento"></div>
+                </div>
+                <div class="pdf-row">
                     <div class="pdf-row-label">Salón:</div>
                     <div class="pdf-row-value" id="pdf-presupuesto-salon"></div>
                 </div>
@@ -532,6 +549,10 @@
                 <div class="pdf-row">
                     <div class="pdf-row-label">Fecha:</div>
                     <div class="pdf-row-value" id="pdf-recibo-fecha"></div>
+                </div>
+                <div class="pdf-row">
+                    <div class="pdf-row-label">Fecha Evento:</div>
+                    <div class="pdf-row-value" id="pdf-recibo-fecha-evento"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Salón:</div>
@@ -576,8 +597,12 @@
             const today = new Date();
             const formattedDate = today.toISOString().split('T')[0];
             
-            document.getElementById('presupuesto-fecha').value = formattedDate;
-            document.getElementById('recibo-fecha').value = formattedDate;
+            document.getElementById('presupuesto-fecha').value = '';
+            document.getElementById('recibo-fecha').value = '';
+            
+            // Keep the event date fields empty as well
+            document.getElementById('presupuesto-fecha-evento').value = '';
+            document.getElementById('recibo-fecha-evento').value = '';
         }
         
         // Agregar un extra
@@ -652,6 +677,7 @@
         function generarPDFPresupuesto() {
             // Obtener los valores del formulario
             const fecha = document.getElementById('presupuesto-fecha').value;
+            const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
             const salon = document.getElementById('presupuesto-salon').value;
             const evento = document.getElementById('presupuesto-evento').value;
             const cliente = document.getElementById('presupuesto-cliente').value;
@@ -660,6 +686,7 @@
             
             // Actualizar contenido del PDF
             document.getElementById('pdf-presupuesto-fecha').textContent = formatDate(fecha);
+            document.getElementById('pdf-presupuesto-fecha-evento').textContent = formatDate(fechaEvento);
             document.getElementById('pdf-presupuesto-salon').textContent = salon;
             document.getElementById('pdf-presupuesto-evento').textContent = evento;
             document.getElementById('pdf-presupuesto-cliente').textContent = cliente;
@@ -700,6 +727,7 @@
         function generarPDFRecibo() {
             // Obtener los valores del formulario
             const fecha = document.getElementById('recibo-fecha').value;
+            const fechaEvento = document.getElementById('recibo-fecha-evento').value;
             const salon = document.getElementById('recibo-salon').value;
             const evento = document.getElementById('recibo-evento').value;
             const cliente = document.getElementById('recibo-cliente').value;
@@ -708,6 +736,7 @@
             
             // Actualizar contenido del PDF
             document.getElementById('pdf-recibo-fecha').textContent = formatDate(fecha);
+            document.getElementById('pdf-recibo-fecha-evento').textContent = formatDate(fechaEvento);
             document.getElementById('pdf-recibo-salon').textContent = salon;
             document.getElementById('pdf-recibo-evento').textContent = evento;
             document.getElementById('pdf-recibo-cliente').textContent = cliente;
