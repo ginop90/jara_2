@@ -98,8 +98,12 @@ function generarPDFPresupuesto() {
     const detalles = document.getElementById('presupuesto-detalles').value;
     const importe = document.getElementById('presupuesto-importe').value;
     
+    // Obtener fecha del evento
+    const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
+
     // Actualizar contenido del PDF
     document.getElementById('pdf-presupuesto-fecha').textContent = formatDate(fecha);
+    document.getElementById('pdf-presupuesto-fecha-evento').textContent = formatDate(fechaEvento);
     document.getElementById('pdf-presupuesto-salon').textContent = salon;
     document.getElementById('pdf-presupuesto-evento').textContent = evento;
     document.getElementById('pdf-presupuesto-cliente').textContent = cliente;
@@ -133,8 +137,8 @@ function generarPDFPresupuesto() {
     document.getElementById('pdf-presupuesto-total').textContent = formatCurrency(total);
     
     // Generar PDF
-    generatePDF('pdf-presupuesto', `Presupuesto_${cliente}_${formatDateFile(fecha)}`);
-}
+    const filename = `Presupuesto_${formatDateFile(fecha)}`;
+    generatePDF('pdf-presupuesto', filename);}
 
 // Generar PDF de Recibo
 function generarPDFRecibo() {
@@ -146,8 +150,12 @@ function generarPDFRecibo() {
     const detalle = document.getElementById('recibo-detalle').value;
     const importe = document.getElementById('recibo-importe').value;
     
+    // Obtener fecha del evento
+    const fechaEvento = document.getElementById('recibo-fecha-evento').value;
+
     // Actualizar contenido del PDF
     document.getElementById('pdf-recibo-fecha').textContent = formatDate(fecha);
+    document.getElementById('pdf-recibo-fecha-evento').textContent = formatDate(fechaEvento);
     document.getElementById('pdf-recibo-salon').textContent = salon;
     document.getElementById('pdf-recibo-evento').textContent = evento;
     document.getElementById('pdf-recibo-cliente').textContent = cliente;
@@ -155,8 +163,9 @@ function generarPDFRecibo() {
     document.getElementById('pdf-recibo-importe').textContent = formatCurrency(importe);
     
     // Generar PDF
-    generatePDF('pdf-recibo', `Recibo_${cliente}_${formatDateFile(fecha)}`);
-}
+    const filename = `Recibo_${formatDateFile(fecha)}`;
+    generatePDF('pdf-recibo', filename);}
+
 
 // Función para generar PDF usando html2canvas y jsPDF
 // Función optimizada para generar PDF
@@ -172,24 +181,22 @@ function generatePDF(elementId, filename) {
     // Determinar escala óptima basada en el dispositivo
     const scale = isMobile() ? 2 : 2;
     
-    // Crear PDF
     html2canvas(element, { 
         scale: scale,
-        backgroundColor: '#000000',
+        backgroundColor: '#ffffff', // Cambio de negro a blanco para mejor visualización
         useCORS: true,
         allowTaint: true,
-        logging: false, // Desactivar logs para mejor rendimiento
-        // Solo capturar el elemento exacto
+        logging: false,
         onclone: function(clonedDoc) {
             const clonedElement = clonedDoc.getElementById(elementId);
-            // Asegurarse que el contenedor tiene altura adecuada
+            // Optimizar estilo de captura
             clonedElement.style.height = 'auto';
             clonedElement.style.width = '100%';
             clonedElement.style.maxWidth = '100%';
             clonedElement.style.paddingBottom = '0';
             clonedElement.style.margin = '0';
             
-            // Asegurar que todos los elementos internos sean visibles
+            // Asegurar visibilidad de elementos internos
             const allElements = clonedElement.querySelectorAll('*');
             allElements.forEach(el => {
                 el.style.overflow = 'visible';
@@ -198,77 +205,85 @@ function generatePDF(elementId, filename) {
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         
-        // Crear PDF con dimensiones optimizadas para móvil
-        // Usar A5 para tamaño más pequeño y mejor para compartir
+        // Crear PDF con dimensiones de A4
         const pdf = new jsPDF('p', 'mm', 'a4');
         
-        // Calcular proporciones para mantener aspecto original
-        const pdfWidth = 210; // Ancho de A4
-        const pdfHeight = 297; // Alto de A4
+        // Configuraciones de página
+        const pdfWidth = 210;
+        const pdfHeight = 297;
+        const margin = 10; // Margen ligeramente más amplio
         
-        // Calcular tamaño de imagen ajustado al PDF con margen
-        const margin = 5; // 5mm de margen (reducido para maximizar espacio)
+        // Color de fondo azul claro inspirado en Homola
+        pdf.setFillColor(52, 152, 219, 0.1); // Azul con opacidad
+        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+        
+        // Calcular tamaño de imagen ajustado
         const imgWidth = pdfWidth - (margin * 2);
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        // Rellenar la página con negro
-        pdf.setFillColor(0, 0, 0);
-        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+        // Añadir la imagen centrada
+        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight, '', 'FAST');
         
-        // Añadir la imagen centrada con margen
-        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-        
-        // Comprimir el PDF para hacerlo más pequeño (mejor para WhatsApp)
+        // Comprimir y generar PDF
         const pdfOutput = pdf.output('blob', {
             compress: true,
-            precision: 2 // Reducir precisión para archivo más pequeño
+            precision: 2
         });
         
-        // Guardar PDF
-        pdf.save(`${filename}.pdf`);
+        // Guardar o compartir PDF
+        try {
+            // Nombre de archivo con formato de Homola
+            const formattedFilename = `${filename}.pdf`;
+            const file = new File([pdfOutput], formattedFilename, { type: 'application/pdf' });
+            
+            // Compartir en dispositivos móviles
+            if (isMobile() && navigator.share && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                    files: [file],
+                    title: filename,
+                }).catch((error) => {
+                    console.error('Error compartiendo archivo:', error);
+                    fallbackDownload(pdfOutput, formattedFilename);
+                });
+            } else {
+                // Descargar en escritorio o si compartir falla
+                fallbackDownload(pdfOutput, formattedFilename);
+            }
+        } catch (error) {
+            console.error('Error al generar PDF:', error);
+            alert('Hubo un problema al generar el PDF. Intente nuevamente.');
+        }
         
         // Ocultar el elemento después de la captura
         element.style.display = 'none';
-        
-        // Si es móvil, intentar compartir el archivo directamente
-        if (isMobile()) {
-            try {
-                const file = new File([pdfOutput], `${filename}.pdf`, { type: 'application/pdf' });
-                
-                if (navigator.share && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        files: [file],
-                        title: filename,
-                    }).catch((error) => {
-                        console.error('Error compartiendo archivo:', error);
-                        // Intentar abrir en nueva pestaña como fallback
-                        const fileURL = URL.createObjectURL(file);
-                        window.open(fileURL, '_blank');
-                    });
-                } else {
-                    // Crear un enlace temporal y hacer clic en él
-                    const fileURL = URL.createObjectURL(pdfOutput);
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = fileURL;
-                    downloadLink.download = `${filename}.pdf`;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    setTimeout(() => {
-                        document.body.removeChild(downloadLink);
-                        URL.revokeObjectURL(fileURL);
-                    }, 100);
-                }
-            } catch (error) {
-                console.error('Error al compartir/descargar PDF:', error);
-                alert('El PDF ha sido generado. Por favor, compruebe sus descargas.');
-            }
-        }
     }).catch(error => {
         console.error('Error al generar PDF:', error);
         alert('Hubo un problema al generar el PDF. Intente nuevamente.');
         element.style.display = 'none';
     });
 }
+
+// Función auxiliar para descarga de PDF
+function fallbackDownload(pdfBlob, filename) {
+    const fileURL = URL.createObjectURL(pdfBlob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = fileURL;
+    downloadLink.download = filename;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    
+    // Limpiar después de un breve tiempo
+    setTimeout(() => {
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(fileURL);
+    }, 100);
+}
+
+// Función auxiliar para detectar si es móvil
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 
 // Detectar si es dispositivo móvil
 function isMobile() {
@@ -297,3 +312,10 @@ window.onload = function() {
     // Agregar un extra por defecto
     agregarExtra();
 };
+// Enviar por WhatsApp con mensaje dinámico
+function enviarPorWhatsApp(tipo, salon, fecha) {
+    const tipoTexto = tipo === 'presupuesto' ? 'Presupuesto' : 'Recibo';
+    const mensaje = `${tipoTexto} para el salón ${salon} con fecha ${formatDate(fecha)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
