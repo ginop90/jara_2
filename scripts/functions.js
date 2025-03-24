@@ -98,8 +98,12 @@ function generarPDFPresupuesto() {
     const detalles = document.getElementById('presupuesto-detalles').value;
     const importe = document.getElementById('presupuesto-importe').value;
     
+    // Obtener fecha del evento
+    const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
+
     // Actualizar contenido del PDF
     document.getElementById('pdf-presupuesto-fecha').textContent = formatDate(fecha);
+    document.getElementById('pdf-presupuesto-fecha-evento').textContent = formatDate(fechaEvento);
     document.getElementById('pdf-presupuesto-salon').textContent = salon;
     document.getElementById('pdf-presupuesto-evento').textContent = evento;
     document.getElementById('pdf-presupuesto-cliente').textContent = cliente;
@@ -133,7 +137,9 @@ function generarPDFPresupuesto() {
     document.getElementById('pdf-presupuesto-total').textContent = formatCurrency(total);
     
     // Generar PDF
-    generatePDF('pdf-presupuesto', `Presupuesto_${cliente}_${formatDateFile(fecha)}`);
+    const filename = `Presupuesto_${formatDateFile(fecha)}`;
+    generatePDF('pdf-presupuesto', filename);
+    enviarPorWhatsApp('presupuesto', salon, fecha);
 }
 
 // Generar PDF de Recibo
@@ -146,8 +152,12 @@ function generarPDFRecibo() {
     const detalle = document.getElementById('recibo-detalle').value;
     const importe = document.getElementById('recibo-importe').value;
     
+    // Obtener fecha del evento
+    const fechaEvento = document.getElementById('recibo-fecha-evento').value;
+
     // Actualizar contenido del PDF
     document.getElementById('pdf-recibo-fecha').textContent = formatDate(fecha);
+    document.getElementById('pdf-recibo-fecha-evento').textContent = formatDate(fechaEvento);
     document.getElementById('pdf-recibo-salon').textContent = salon;
     document.getElementById('pdf-recibo-evento').textContent = evento;
     document.getElementById('pdf-recibo-cliente').textContent = cliente;
@@ -155,7 +165,9 @@ function generarPDFRecibo() {
     document.getElementById('pdf-recibo-importe').textContent = formatCurrency(importe);
     
     // Generar PDF
-    generatePDF('pdf-recibo', `Recibo_${cliente}_${formatDateFile(fecha)}`);
+    const filename = `Recibo_${formatDateFile(fecha)}`;
+    generatePDF('pdf-recibo', filename);
+    enviarPorWhatsApp('recibo', salon, fecha);
 }
 
 // Función para generar PDF usando html2canvas y jsPDF
@@ -297,3 +309,10 @@ window.onload = function() {
     // Agregar un extra por defecto
     agregarExtra();
 };
+// Enviar por WhatsApp con mensaje dinámico
+function enviarPorWhatsApp(tipo, salon, fecha) {
+    const tipoTexto = tipo === 'presupuesto' ? 'Presupuesto' : 'Recibo';
+    const mensaje = `${tipoTexto} para el salón ${salon} con fecha ${formatDate(fecha)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
