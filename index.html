@@ -113,6 +113,7 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
+            margin-top: 30px;
         }
 
         .form-group {
@@ -262,19 +263,25 @@
         }
 
         .pdf-header {
-            background-color: #222;
-            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 15px;
             margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between; /* Changed to space-between */
-            align-items: center;
-            text-align: left; /* Changed to left alignment */
+            background-color: #222;
+            color: white;
         }
 
-        .pdf-header-text {
+        .pdf-header-left {
             display: flex;
             flex-direction: column;
+            text-align: left;
+        }
+
+        .pdf-header-right {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .pdf-logo {
@@ -300,9 +307,52 @@
             color: #ccc;
         }
 
-        hr {
-            border-color: #444;
-            margin: 15px 0;
+        .pdf-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: baseline; /* Align items at the baseline */
+        }
+
+        .pdf-row-label {
+            flex: 0 0 100px; /* Fixed width for labels */
+            margin-right: 10px; /* Space between label and value */
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .pdf-row-value {
+            flex: 1;
+            text-align: left; /* Left-align the values */
+        }
+
+        .pdf-document-type {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .pdf-row .pdf-document-type + .pdf-row-value {
+            margin-left: auto; /* Push the date to the right of the document type */
+        }
+
+        .pdf-detail {
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
+        .pdf-total {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .pdf-extra-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -442,16 +492,17 @@
         <!-- Contenido para PDF Presupuesto -->
         <div id="pdf-presupuesto" class="pdf-content">
             <div class="pdf-header">
-                <div class="pdf-header-text">
+                <div class="pdf-header-left">
                     <div class="pdf-company-name">Jara DJ Group</div>
                     <div class="pdf-company-subtitle">DJ, Sonido e Iluminación</div>
                 </div>
-                <div class="pdf-logo">Logo</div>
+                <div class="pdf-header-right">
+                    <div class="pdf-logo">Logo</div>
+                </div>
             </div>
             <div class="pdf-body">
                 <div class="pdf-row">
                     <div class="pdf-document-type">PRESUPUESTO</div>
-                    <div class="pdf-row-value" id="pdf-presupuesto-fecha"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Fecha:</div>
@@ -470,6 +521,9 @@
                     <div class="pdf-row-value" id="pdf-presupuesto-cliente"></div>
                 </div>
                 <hr>
+                <div class="pdf-row">
+                    <div class="pdf-row-hr"></div>
+                </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Detalles:</div>
                 </div>
@@ -490,16 +544,17 @@
         <!-- Contenido para PDF Recibo -->
         <div id="pdf-recibo" class="pdf-content">
             <div class="pdf-header">
-                <div class="pdf-header-text">
+                <div class="pdf-header-left">
                     <div class="pdf-company-name">Jara DJ Group</div>
                     <div class="pdf-company-subtitle">DJ, Sonido e Iluminación</div>
                 </div>
-                <div class="pdf-logo">Logo</div>
+                <div class="pdf-header-right">
+                    <div class="pdf-logo">Logo</div>
+                </div>
             </div>
             <div class="pdf-body">
                 <div class="pdf-row">
                     <div class="pdf-document-type">RECIBO</div>
-                    <div class="pdf-row-value" id="pdf-recibo-fecha"></div>
                 </div>
                 <div class="pdf-row">
                     <div class="pdf-row-label">Fecha:</div>
@@ -519,6 +574,9 @@
                 </div>
                 <hr>
                 <div class="pdf-row">
+                    <div class="pdf-row-hr"></div>
+                </div>
+                <div class="pdf-row">
                     <div class="pdf-row-label">Detalle:</div>
                 </div>
                 <div class="pdf-detail" id="pdf-recibo-detalle"></div>
@@ -530,6 +588,7 @@
     </div>
 
     <script>
+        // [Previous script remains exactly the same]
         // Variables para manejar extras
         let extrasCount = 0;
         const extras = [];
