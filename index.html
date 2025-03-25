@@ -691,78 +691,202 @@
             return `$${number.toLocaleString()}`;
         }
         
-        // Generar PDF de Presupuesto
-        function generarPDFPresupuesto() {
-            // Obtener los valores del formulario
-            const fecha = document.getElementById('presupuesto-fecha').value;
-            const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
-            const salon = document.getElementById('presupuesto-salon').value;
-            const evento = document.getElementById('presupuesto-evento').value;
-            const cliente = document.getElementById('presupuesto-cliente').value;
-            const detalles = document.getElementById('presupuesto-detalles').value;
-            const importe = document.getElementById('presupuesto-importe').value;
-            
-            // Actualizar contenido del PDF
-            document.getElementById('pdf-presupuesto-fecha').textContent = formatDate(fecha);
-            document.getElementById('pdf-presupuesto-fecha-evento').textContent = formatDate(fechaEvento);
-            document.getElementById('pdf-presupuesto-salon').textContent = salon;
-            document.getElementById('pdf-presupuesto-evento').textContent = evento;
-            document.getElementById('pdf-presupuesto-cliente').textContent = cliente;
-            document.getElementById('pdf-presupuesto-detalles').textContent = detalles;
-            document.getElementById('pdf-presupuesto-importe').textContent = formatCurrency(importe);
-            
-            // Limpiar el contenedor de extras
-            const pdfExtrasContainer = document.getElementById('pdf-extras-container');
-            pdfExtrasContainer.innerHTML = '';
-            
-            // Agregar los extras al PDF
-            let totalExtras = 0;
-            extras.forEach(extraId => {
-                const extraDesc = document.getElementById(`${extraId}-desc`).value;
-                const extraImporte = parseFloat(document.getElementById(`${extraId}-importe`).value) || 0;
-                
-                if (extraDesc || extraImporte > 0) {
-                    const extraDiv = document.createElement('div');
-                    extraDiv.className = 'pdf-extra-row';
-                    extraDiv.innerHTML = `
-                        <div class="pdf-extra-name">${extraDesc}</div>
-                        <div class="pdf-extra-amount">${formatCurrency(extraImporte)}</div>
-                    `;
-                    pdfExtrasContainer.appendChild(extraDiv);
-                    
-                    totalExtras += extraImporte;
+        // Función para generar PDF de Presupuesto estilo HOMOLA
+function generarPDFPresupuesto() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const fecha = document.getElementById('presupuesto-fecha').value;
+    const cliente = document.getElementById('presupuesto-cliente').value || 'Cliente';
+    const evento = document.getElementById('presupuesto-evento').value;
+    const salon = document.getElementById('presupuesto-salon').value;
+    const fechaEvento = document.getElementById('presupuesto-fecha-evento').value;
+    const detalles = document.getElementById('presupuesto-detalles').value;
+    const importe = parseFloat(document.getElementById('presupuesto-importe').value) || 0;
+    const extrasContainer = document.getElementById('extras-container');
+    const extraItems = extrasContainer.querySelectorAll('.extra-item');
+
+    let totalExtras = 0;
+    const extras = [];
+    extraItems.forEach(item => {
+        const desc = item.querySelector('.extra-descripcion').value;
+        const valor = parseFloat(item.querySelector('.extra-importe').value) || 0;
+        totalExtras += valor;
+        extras.push({ desc, valor });
+    });
+
+    const total = importe + totalExtras;
+
+    doc.setFillColor(18, 18, 18);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.text("JARA DJ's GROUP", 20, 20);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "normal");
+    doc.text('DJ, Sonido e Iluminación', 20, 30);
+
+    doc.setTextColor(44, 62, 80);
+    doc.setFontSize(14);
+    doc.text('PRESUPUESTO', 20, 50);
+    doc.setDrawColor(52, 152, 219);
+    doc.setLineWidth(0.5);
+    doc.line(20, 55, 190, 55);
+
+    doc.setFontSize(12);
+    doc.text(`Fecha: ${formatDate(fecha)}`, 20, 65);
+    doc.text(`Cliente: ${cliente}`, 20, 75);
+    doc.text(`Evento: ${evento}`, 20, 85);
+    doc.text(`Salón: ${salon}`, 20, 95);
+    doc.text(`Fecha del evento: ${formatDate(fechaEvento)}`, 20, 105);
+
+    let y = 120;
+    doc.setFillColor(230, 230, 230);
+    doc.rect(20, y - 10, 170, 10, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.text('DETALLES', 25, y - 2);
+
+    const detalleTexto = detalles.trim();
+    const lines = doc.splitTextToSize(detalleTexto, 160);
+    doc.text(lines, 25, y + 8);
+    y += lines.length * 7 + 15;
+
+    if (extras.length > 0) {
+        doc.setFillColor(245, 245, 245);
+        doc.rect(20, y, 170, 10, 'F');
+        doc.setTextColor(0, 0, 0);
+        doc.text('EXTRAS', 25, y + 7);
+        y += 15;
+        extras.forEach(extra => {
+            doc.text(`- ${extra.desc}: $${formatearNumero(extra.valor)}`, 25, y);
+            y += 8;
+        });
+    }
+
+    y += 10;
+    doc.setFillColor(52, 152, 219);
+    doc.rect(20, y, 170, 12, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.text(`TOTAL: $${formatearNumero(total)}`, 25, y + 9);
+
+    doc.setTextColor(128, 128, 128);
+    doc.setFontSize(10);
+    doc.text("Jara DJ's Group", 20, y + 30);
+    doc.text('San Rafael / Tel: 2604-000-000', 20, y + 35);
+
+    try {
+        const pdfOutput = doc.output('blob');
+        const file = new File([pdfOutput], `Presupuesto_${cliente}_${formatDateFile(fecha)}.pdf`, { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(file);
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        if (isMobile()) {
+            setTimeout(() => {
+                if (navigator.share) {
+                    navigator.share({
+                        files: [file],
+                        title: file.name
+                    }).catch(err => console.log('Compartir cancelado o fallido:', err));
                 }
-            });
-            
-            const total = (parseFloat(importe) || 0) + totalExtras;
-            document.getElementById('pdf-presupuesto-total').textContent = formatCurrency(total);
-            
-            // Generar PDF
-            generatePDF('pdf-presupuesto', `Presupuesto_${cliente}_${formatDateFile(fecha)}`);
+            }, 1000);
         }
-        
-        // Generar PDF de Recibo
-        function generarPDFRecibo() {
-            // Obtener los valores del formulario
-            const fecha = document.getElementById('recibo-fecha').value;
-            const salon = document.getElementById('recibo-salon').value;
-            const evento = document.getElementById('recibo-evento').value;
-            const cliente = document.getElementById('recibo-cliente').value;
-            const detalle = document.getElementById('recibo-detalle').value;
-            const importe = document.getElementById('recibo-importe').value;
-            
-            // Actualizar contenido del PDF
-            document.getElementById('pdf-recibo-fecha').textContent = formatDate(fecha);
-            document.getElementById('pdf-recibo-salon').textContent = salon;
-            document.getElementById('pdf-recibo-evento').textContent = evento;
-            document.getElementById('pdf-recibo-cliente').textContent = cliente;
-            document.getElementById('pdf-recibo-detalle').textContent = detalle;
-            document.getElementById('pdf-recibo-importe').textContent = formatCurrency(importe);
-            
-            // Generar PDF
-            generatePDF('pdf-recibo', `Recibo_${cliente}_${formatDateFile(fecha)}`);
+
+    } catch (err) {
+        console.error('Error al generar el PDF:', err);
+        alert('Hubo un error al generar el PDF.');
+    }
+}
+
+// Función para generar PDF de Recibo estilo HOMOLA
+function generarPDFRecibo() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const fecha = document.getElementById('recibo-fecha').value;
+    const cliente = document.getElementById('recibo-cliente').value || 'Cliente';
+    const evento = document.getElementById('recibo-evento').value;
+    const salon = document.getElementById('recibo-salon').value;
+    const detalle = document.getElementById('recibo-detalle').value;
+    const importe = parseFloat(document.getElementById('recibo-importe').value) || 0;
+
+    doc.setFillColor(18, 18, 18);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.text("JARA DJ's GROUP", 20, 20);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "normal");
+    doc.text('DJ, Sonido e Iluminación', 20, 30);
+
+    doc.setTextColor(44, 62, 80);
+    doc.setFontSize(14);
+    doc.text('RECIBO', 20, 50);
+    doc.setDrawColor(52, 152, 219);
+    doc.setLineWidth(0.5);
+    doc.line(20, 55, 190, 55);
+
+    doc.setFontSize(12);
+    doc.text(`Fecha: ${formatDate(fecha)}`, 20, 65);
+    doc.text(`Cliente: ${cliente}`, 20, 75);
+    doc.text(`Evento: ${evento}`, 20, 85);
+    doc.text(`Salón: ${salon}`, 20, 95);
+
+    let y = 110;
+    doc.setFillColor(230, 230, 230);
+    doc.rect(20, y - 10, 170, 10, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.text('DETALLE', 25, y - 2);
+
+    const detalleTexto = detalle.trim();
+    const lines = doc.splitTextToSize(detalleTexto, 160);
+    doc.text(lines, 25, y + 8);
+    y += lines.length * 7 + 15;
+
+    y += 10;
+    doc.setFillColor(52, 152, 219);
+    doc.rect(20, y, 170, 12, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.text(`TOTAL RECIBIDO: $${formatearNumero(importe)}`, 25, y + 9);
+
+    doc.setTextColor(128, 128, 128);
+    doc.setFontSize(10);
+    doc.text("Jara DJ's Group", 20, y + 30);
+    doc.text('San Rafael / Tel: 2604-000-000', 20, y + 35);
+
+    try {
+        const pdfOutput = doc.output('blob');
+        const file = new File([pdfOutput], `Recibo_${cliente}_${formatDateFile(fecha)}.pdf`, { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(file);
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        if (isMobile()) {
+            setTimeout(() => {
+                if (navigator.share) {
+                    navigator.share({
+                        files: [file],
+                        title: file.name
+                    }).catch(err => console.log('Compartir cancelado o fallido:', err));
+                }
+            }, 1000);
         }
-        
+
+    } catch (err) {
+        console.error('Error al generar el PDF:', err);
+        alert('Hubo un error al generar el PDF.');
+    }
+}
         // Función para generar PDF usando html2canvas y jsPDF
         // Reemplazo completo de la función generatePDF con el estilo de HOMOLA
         function generatePDF() {
